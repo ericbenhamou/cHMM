@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 class Data_loader:
-    def __init__(self, filename, folder, remove_null_nan=True, delimiter=',', date_format='YYYY-mm-dd' ):
+    def __init__(self, filename, folder, remove_null_nan=True, delimiter=',', date_format='YYYY-mm-dd'):
         dataframe = pd.read_csv(folder + filename, delimiter=delimiter)
         if remove_null_nan and dataframe['Close'].dtypes == 'object':
             dataframe[dataframe == 'null'] = np.nan
@@ -42,9 +42,10 @@ class Data_loader:
                 self.dataframe[column] = pd.to_numeric(
                     self.dataframe[column])
         for column in datetype_columns:
-            #if self.dataframe[column].dtype != 'datetime':
+            # if self.dataframe[column].dtype != 'datetime':
             for i in range(self.dataframe[column].shape[0]):
-                self.dataframe[column].values[i] = datetime.strptime( self.dataframe[column].values[i], date_format )
+                self.dataframe[column].values[i] = datetime.strptime(
+                    self.dataframe[column].values[i], date_format)
 
     def get_field(self, field_name):
         return self.dataframe[field_name].values
