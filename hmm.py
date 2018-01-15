@@ -204,7 +204,7 @@ class Hmm(object):
 
 
     # Q3 Expectation Maximization algo
-    def EM(self, compute_likelihood  = False, max_iter = 200, precision = 1e-4 ):
+    def EM(self, compute_likelihood  = False, max_iter = 1000, precision = 1e-4 ):
         if compute_likelihood:
             self.llh = []
         min_pi = np.full((self.K), 1e-7)

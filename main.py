@@ -59,7 +59,7 @@ h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
 lgd = plt.legend(h1+h2, l1+l2, loc=4)
 plt.title('Price of USDCHF and Gold (01/02/2013 to 31/05/2013)')
-utils.save_figure(plt, 'main', 'prices', lgd )
+utils.save_figure(plt, 'Main', '1', lgd )
 
 # compute data
 obs_states = 8
