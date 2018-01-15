@@ -36,7 +36,8 @@ class Hmm(object):
                              for j in range(self.K)] for i in range(self.K)])
 
         # the emission probabilities are multinomials
-        self.eta = np.matrix([[abs(math.cos(i + 1)) if i == j else (1 - abs(math.cos(i + 1))) / (self.obs_states - 1) for j in range(self.obs_states)]
+        self.eta = np.matrix([[abs(math.cos(i + 1)) if i == j else (1 - abs(math.cos(i + 1))) \
+                               / (self.obs_states - 1) for j in range(self.obs_states)]
                 for i in range(self.K)])
 
         # store the initial value
@@ -231,8 +232,9 @@ class Hmm(object):
             self.a = np.fmax(self.a, min_a)
             self.a /= self.a.sum(1)[:, None]
             mean_cond_proba = self.cond_proba.sum(0)
-            self.eta = self.cond_proba[:, :, None] * self.data[:, None, :]).sum(0) / mean_cond_proba[:, None]
-            self.eta=np.fmax(self.eta, eta_min)
+            self.eta = (self.cond_proba[:, :, None] * self.data[:, None, :]).sum(0) / \
+                mean_cond_proba[:, None]
+            self.eta=np.fmax(self.eta, min_eta)
             self.eta /= self.eta.sum(1)[:, None]
 
             # compute expected_complete_log_likelihood
@@ -312,10 +314,10 @@ class Hmm(object):
             for t in range(1, self.T):
                 for q in self.states:
                     (self.max_proba[t, q], self.max_index[t - 1, q])=max(
-                        (self.max_proba[t - 1, q0] * self.a[q0, q] * self.b[t, q], q0) for q0 in self.states)
+                        (self.max_proba[t - 1, q0] * self.a[q0, q] * self.b[t, q], q0) 
+                            for q0 in self.states)
                 self.scale_factor_viterbi[t]=self.max_proba[t, :].sum()
-                self.max_proba[t, :]=self.max_proba[t, :] /
-                    self.scale_factor_viterbi[t]
+                self.max_proba[t, :]=self.max_proba[t, :] / self.scale_factor_viterbi[t]
 
             # do backward induction
             self.path[self.T - 1]=np.argmax(self.max_proba[self.T - 1, :])
