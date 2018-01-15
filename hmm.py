@@ -34,7 +34,7 @@ class Hmm(object):
                              for j in range(self.K)] for i in range(self.K)])
 
         # the emission probabilities are multinomials
-        self.eta = np.matrix( [[1/2 if i==j else 0.5/(self.obs_states-1) for j in range(self.obs_states)]
+        self.eta = np.matrix( [[1/2+i/2/self.K if i==j else (0.5-i/2/self.K)/(self.obs_states-1) for j in range(self.obs_states)]
                 for i in range(self.K)])
 
         #store the initial value 
@@ -172,10 +172,10 @@ class Hmm(object):
         self.__plot_states( self.cond_proba, T_max, title, prefix, suffix)
         return
     
-    def plot_most_likely_state(self, path_data, T_max, title, prefix, suffix):
-        data = np.zeros((len(path_data),self.K))
-        for i in range(len(path_data)):
-            data[i, int(path_data[i])] = 1
+    def plot_most_likely_state(self, T_max, title, prefix, suffix):
+        data = np.zeros((len(self.path),self.K))
+        for i in range(len(self.path)):
+            data[i, int(self.path[i])] = 1
         self.__plot_states( data, T_max, title, prefix, suffix, 'step')
         return
     
@@ -263,11 +263,10 @@ class Hmm(object):
     #Q7    
     # Viterbi decoding algorithm to find the most probable path followed
     # by the latent variables Q to generate the observations u
-    def compute_viterbi_path(self, data):
-        T=len(data)
-        self.path = np.zeros(T)
-        self.max_index = np.zeros((T, self.K))
-        self.max_proba = np.zeros((T, self.K))
+    def compute_viterbi_path(self):
+        self.path = np.zeros(self.T)
+        self.max_index = np.zeros((self.T, self.K))
+        self.max_proba = np.zeros((self.T, self.K))
 
         if self.hmm_type == 'log-scale':
             # precompute the log
@@ -278,17 +277,17 @@ class Hmm(object):
             self.max_proba[0,:] = l_pi + l_b[0,:]
             
             # Run Viterbi for t > 0
-            for t in range(1, T):
+            for t in range(1, self.T):
                 for q in self.states:
                     (self.max_proba[t, q], self.max_index[t-1, q]) = max((self.max_proba[t-1, q0] + l_a[q0, q] + l_b[t, q], q0) for q0 in self.states)
 
             # do backward induction
-            self.path[T-1] = np.argmax(self.max_proba[T-1, :])
-            for t in range(T-2, -1, -1):
+            self.path[self.T-1] = np.argmax(self.max_proba[self.T-1, :])
+            for t in range(self.T-2, -1, -1):
                 self.path[t] = self.max_index[t, int(self.path[t+1])]
             
         elif self.hmm_type == 'rescaled':
-            self.scale_factor_viterbi = np.zeros(T)
+            self.scale_factor_viterbi = np.zeros(self.T)
             
             # Initialize base cases (t == 0)
             self.max_proba[0, :] = self.pi * self.b[0, :]
@@ -296,17 +295,16 @@ class Hmm(object):
             self.max_proba[0, :] = self.max_proba[0, :] / self.scale_factor_viterbi[0]
          
             # Run Viterbi for t > 0
-            for t in range(1, T):
+            for t in range(1, self.T):
                 for q in self.states:
                     (self.max_proba[t, q], self.max_index[t-1, q]) = max((self.max_proba[t-1, q0] * self.a[q0, q] * self.b[t, q], q0) for q0 in self.states)
                 self.scale_factor_viterbi[t] = self.max_proba[t, :].sum()
                 self.max_proba[t, :] = self.max_proba[t, :] / self.scale_factor_viterbi[t]
 
             # do backward induction
-            self.path[T-1] = np.argmax(self.max_proba[T-1, :])
-            for t in range(T-2, -1, -1):
+            self.path[self.T-1] = np.argmax(self.max_proba[self.T-1, :])
+            for t in range(self.T-2, -1, -1):
                 self.path[t] = self.max_index[t, int(self.path[t+1])]
         else:
             raise RuntimeError("unknow type allowed log-scale or rescaled")
         return
-    

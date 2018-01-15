@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import technical_analysis as ta
 import hmm as hmm
+import utils
+
 
 def transform_data(data, obs_states):
     rsi = ta.rsi(data, period = 4, smooth = 3)
@@ -55,9 +57,9 @@ ax1 = df.CHF.plot(color='blue', grid=True, label='USDCHF')
 ax2 = df.Gold.plot(color='red', grid=True, secondary_y=True, label='Gold')
 h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
-plt.legend(h1+h2, l1+l2, loc=4)
+lgd = plt.legend(h1+h2, l1+l2, loc=4)
 plt.title('Price of USDCHF and Gold (01/02/2013 to 31/05/2013)')
-plt.show()
+utils.save_figure(plt, 'main', 'prices', lgd )
 
 # compute data
 obs_states = 8
@@ -71,10 +73,12 @@ hidden_states = 5
 def get_some_results(data, name):
     hmm_obj = hmm.Hmm(data)
     hmm_obj.compute_proba()
-    hmm_obj.plot_proba(100,'Conditional proba (CHF)','{}'.format(name),'1')
+    hmm_obj.plot_proba(100,'Conditional proba ({})'.format(name),'{}'.format(name),'1')
     hmm_obj.EM(True)
     hmm_obj.print_parameters()
     hmm_obj.plot_likelihood('{}'.format(name),'2')
+    hmm_obj.compute_viterbi_path()
+    hmm_obj.plot_most_likely_state( len( hmm_obj.path), 'Viterbi ({})'.format(name),'{}'.format(name),'3')
 
 get_some_results(chf_data,'CHF')
 get_some_results(gold_data,'Gold')
