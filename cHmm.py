@@ -1,6 +1,6 @@
 """
 homework 3: PGM
-@author: eric.benhamou
+@author: eric.benhamou, david sabbagh, valentin melot
 """
 
 import math

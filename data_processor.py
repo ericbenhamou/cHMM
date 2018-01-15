@@ -2,7 +2,7 @@
 """
 Created on Tue Jan 5  17:15:44 2018
 
-@author: eric.benhamou, david.sabbagh
+@author: eric.benhamou, david sabbagh, valentin melot
 """
 
 """

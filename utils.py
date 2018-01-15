@@ -2,7 +2,7 @@
 """
 Created on Wed Jan  3 23:28:52 2018
 
-@author: eric.benhamou
+@author: eric.benhamou, david sabbagh, valentin melot
 """
 
 import os.path

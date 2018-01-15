@@ -1,6 +1,6 @@
 """
 homework 3: PGM
-@author: eric.benhamou
+@author: eric.benhamou, david sabbagh, valentin melot
 """
 
 import math
@@ -8,7 +8,6 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import utils
-from scipy.stats import multinomial
 
 
 COLORS = ["r", "orange", "b", "g", "darkgreen"]
@@ -20,7 +19,7 @@ assuming multinomial probabilities
 
 
 class Hmm(object):
-    def __init__(self, data, hmm_type='rescaled', hidden_states=5, obs_states=8):
+    def __init__(self, data, hmm_type, hidden_states, obs_states):
 
         if hmm_type != 'log-scale' and hmm_type != 'rescaled':
             raise RuntimeError("unknow type! allowed log-scale or rescaled")
@@ -53,12 +52,9 @@ class Hmm(object):
     # compute the emissio probabilities
     # based on gaussian assumptions
     def __compute_B(self):
-        self.multinomial = [multinomial(1, self.eta[i, :])
-                                        for i in range(self.K)]
         self.b = np.zeros((self.T, self.K))
         for t in range(self.T):
-            self.b[t, :] = [self.eta[y, int(self.data[t, y])]
-                                            for y in range(self.K)]
+            self.b[t, :] = [self.eta[y, int(self.data[t, y])] for y in range(self.K)]
 
         # other computation for log-scale
         if self.hmm_type == 'log-scale':
@@ -185,21 +181,32 @@ class Hmm(object):
         self.__plot_states(data, T_max, title, prefix, suffix, 'step')
         return
 
-    def __plot_states(self, data, T_max, title, prefix, suffix, plot_type='plot'):
-        f, axarr = plt.subplots(self.K,  sharex=True)
-        for i in range(self.K):
+    def __plot_states_bucket(self, data, T_max, title, prefix, suffix, plot_type, start, end):
+        f, axarr = plt.subplots(end-start,  sharex=True)
+        f.tight_layout() 
+        for i in range(end-start):
             if plot_type == 'step':
                 axarr[i].step(range(T_max), data[:T_max, i],
-                              c=COLORS[i], label="State %d" % (i + 1))
+                     c=COLORS[i], label="State %d" % (start + i + 1))
             else:
                 axarr[i].plot(range(T_max), data[:T_max, i],
-                              c=COLORS[i], label="State %d" % (i + 1))
+                     c=COLORS[i], label="State %d" % (start + i + 1))
             axarr[i].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
         f.subplots_adjust(hspace=0.2)
         lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        plt.title(title, y=(self.K + 0.8))
+        plt.title(title, y=(end-start + 0.8))
         plt.setp([a.get_xticklabels() for a in f.axes[:-1]], visible=False)
         utils.save_figure(plt, prefix, suffix, lgd)
+        return
+        
+    def __plot_states(self, data, T_max, title, prefix, suffix, plot_type='plot'):
+        if self.K <= 5:
+            self.__plot_states_bucket(data, T_max, title, prefix, suffix, plot_type, 0, self.K)
+        else:
+            for i in range( (self.K-1) // 5 + 1):
+                start = 5*i
+                end = min(self.K, 5*(i+1))
+                self.__plot_states_bucket(data, T_max, title, prefix, suffix, plot_type, start, end)
         return
 
     # the incomplete lok likelihood is composed

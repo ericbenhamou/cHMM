@@ -50,6 +50,8 @@ def load_data():
     df = df_joined[df_joined.nb % period == 0]
     return df
 
+# load data
+df = load_data()
 
 # plot data
 plt.figure(figsize=(12, 5))
@@ -67,12 +69,12 @@ obs_states = 8
 obs_range = np.linspace(0, 100, obs_states + 1)  # 0., 0.125, 0.25, ...
 chf_data = transform_data(df.CHF, obs_states)
 gold_data = transform_data(df.Gold, obs_states)
+chmm_data = np.array([ np.ravel(np.outer(chf_data[t, :], gold_data[t, :])) for t in range(chf_data.shape[0])])
 hidden_states = 5
 
-# compute individual Hmm
-
-
-def get_some_results(data, name):
+# show some results
+def get_some_results(data, name, hidden_states):
+    obs_states = data.shape[1]
     hmm_obj = hmm.Hmm(data, 'rescaled', hidden_states, obs_states)
     hmm_obj.compute_proba()
     hmm_obj.plot_proba(200, 'Conditional proba ({})'.format(
@@ -87,8 +89,9 @@ def get_some_results(data, name):
         200, 'Viterbi ({})'.format(name), '{}'.format(name), '4')
     return hmm_obj
 
+# individual hmms
+chf_hmm = get_some_results(chf_data, 'CHF', hidden_states)
+gold_hmm = get_some_results(gold_data, 'Gold', hidden_states)
 
-chf_hmm = get_some_results(chf_data, 'CHF')
-gold_hmm = get_some_results(gold_data, 'Gold')
-
-# joint data
+# joint hmm
+joined_hmm = get_some_results(chmm_data, 'CHF-Gold', hidden_states * hidden_states)
